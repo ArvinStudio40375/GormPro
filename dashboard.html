@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - Form dan Tabel</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      padding: 40px;
+    }
+    .form-container {
+      background: #fff;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: green;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .success { color: green; margin-top: 10px; }
+    .error { color: red; margin-top: 10px; }
+
+    table {
+      width: 100%;
+      margin-top: 30px;
+      border-collapse: collapse;
+      background: white;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .table-container {
+      max-width: 800px;
+      margin: 40px auto;
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2>Form Tambah Data</h2>
+  <input type="text" id="nama" placeholder="Nama" required />
+  <input type="email" id="email" placeholder="Email" required />
+  <input type="text" id="hp" placeholder="No HP" required />
+  <button onclick="kirimData()">Kirim</button>
+  <div id="status"></div>
+</div>
+
+<div class="table-container">
+  <h2>Data yang Sudah Diinput</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Email</th>
+        <th>No HP</th>
+        <th>Waktu Input</th>
+      </tr>
+    </thead>
+    <tbody id="data-body">
+      <!-- Data akan dimuat di sini -->
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://vilfkhsyvilllmgqxavr.supabase.co";
+  const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpbGZraHN5dmlsbGxtZ3F4YXZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxMjQ3NTgsImV4cCI6MjA2ODcwMDc1OH0.yKCh8QDzrX9Q6z-7VCPgEVQQSgtW8sO7ZixtA6Qt9UU";
+
+  async function kirimData() {
+    const nama = document.getElementById("nama").value;
+    const email = document.getElementById("email").value;
+    const hp = document.getElementById("hp").value;
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/form_data`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": API_KEY,
+        "Authorization": "Bearer " + API_KEY,
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify({ nama, email, hp })
+    });
+
+    const status = document.getElementById("status");
+    if (res.ok) {
+      status.innerHTML = "✅ Data berhasil dikirim.";
+      status.className = "success";
+      document.getElementById("nama").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("hp").value = "";
+      ambilData(); // refresh data setelah kirim
+    } else {
+      status.innerHTML = "❌ Gagal mengirim data.";
+      status.className = "error";
+    }
+  }
+
+  async function ambilData() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/form_data?select=*`, {
+      headers: {
+        "apikey": API_KEY,
+        "Authorization": "Bearer " + API_KEY
+      }
+    });
+
+    const data = await res.json();
+    const tbody = document.getElementById("data-body");
+    tbody.innerHTML = "";
+
+    data.reverse().forEach(item => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${item.nama}</td>
+        <td>${item.email}</td>
+        <td>${item.hp}</td>
+        <td>${new Date(item.created_at).toLocaleString("id-ID")}</td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  // Jalankan saat halaman dibuka
+  ambilData();
+</script>
+
+</body>
+</html>

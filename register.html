@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f5f5f5;
+    }
+    .register-box {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      width: 300px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      width: 100%;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="register-box">
+    <h2>Register</h2>
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="register()">Daftar</button>
+    <p id="status" style="color:red;"></p>
+    <p style="text-align:center;margin-top:10px;">
+      Sudah punya akun? <a href="login.html">Login</a>
+    </p>
+  </div>
+
+  <script>
+    const API_URL = 'https://vilfkhsyvilllmgqxavr.supabase.co/rest/v1/users';
+    const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpbGZraHN5dmlsbGxtZ3F4YXZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxMjQ3NTgsImV4cCI6MjA2ODcwMDc1OH0.yKCh8QDzrX9Q6z-7VCPgEVQQSgtW8sO7ZixtA6Qt9UU';
+
+    async function register() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+
+      if (!user || !pass) {
+        document.getElementById("status").innerText = "Isi semua field!";
+        return;
+      }
+
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': API_KEY,
+          'Authorization': 'Bearer ' + API_KEY
+        },
+        body: JSON.stringify({
+          username: user,
+          password: pass
+        })
+      });
+
+      if (res.ok) {
+        document.getElementById("status").style.color = "green";
+        document.getElementById("status").innerText = "Registrasi berhasil! Silakan login.";
+      } else {
+        const msg = await res.text();
+        document.getElementById("status").innerText = "Gagal: " + msg;
+      }
+    }
+  </script>
+</body>
+</html>
